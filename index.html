@@ -11,9 +11,10 @@
         margin: 0;
         padding: 0;
         overflow: hidden;
+        background-color: #000000; /* Set background to black */
       }
       #unity-canvas {
-        background: #CCCCCC;
+        background: #000000; /* Ensure canvas has a black background */
       }
     </style>
   </head>
@@ -40,6 +41,11 @@
         productVersion: "0.1.0",
         matchWebGLToCanvasSize: true,
         devicePixelRatio: window.devicePixelRatio || 1,
+      });
+
+      // Disable fullscreen on click
+      document.querySelector("#unity-canvas").addEventListener("click", function (event) {
+        event.stopPropagation(); // Prevent any default actions
       });
 
       // Mobile-specific behavior
