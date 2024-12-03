@@ -2,28 +2,67 @@
 <html lang="en-us">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | JamesURPOS</title>
+    <title>Unity WebGL Player | 16:9 Game</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Prevent scrollbars */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh; /* Ensure full height for the browser window */
+        background: black; /* Optional: Background color behind the game */
+      }
+      #unity-container {
+        position: relative;
+        width: 100%; /* Default to full width */
+        height: 100%;
+        max-width: 100vw; /* Prevent overflow beyond viewport */
+        max-height: 100vh; /* Prevent overflow beyond viewport */
+        aspect-ratio: 16 / 9; /* Maintain 16:9 ratio */
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+        display: block; /* Prevent unwanted spacing below canvas */
+        background: black; /* Match container's background */
+      }
+    </style>
   </head>
-  <body style="text-align: center; padding: 0; border: 0; margin: 0;">
-    <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1" style="width: 1920px; height: 1080px; background: #000000"></canvas>
+  <body>
+    <div id="unity-container">
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
+    </div>
     <script src="Build/Build.loader.js"></script>
     <script>
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
+      function adjustCanvas() {
+        const container = document.querySelector("#unity-container");
+        const canvas = document.querySelector("#unity-canvas");
 
-        var canvas = document.querySelector("#unity-canvas");
+        // Ensure the container fits the browser while keeping 16:9
+        const browserRatio = window.innerWidth / window.innerHeight;
+        const gameRatio = 16 / 9;
+
+        if (browserRatio > gameRatio) {
+          // Browser is wider than 16:9: Limit by height
+          container.style.width = `${window.innerHeight * gameRatio}px`;
+          container.style.height = `${window.innerHeight}px`;
+        } else {
+          // Browser is taller than 16:9: Limit by width
+          container.style.width = `${window.innerWidth}px`;
+          container.style.height = `${window.innerWidth / gameRatio}px`;
+        }
+
         canvas.style.width = "100%";
         canvas.style.height = "100%";
-        canvas.style.position = "fixed";
-
-        document.body.style.textAlign = "left";
       }
 
+      // Adjust on resize and load
+      window.addEventListener("resize", adjustCanvas);
+      window.addEventListener("load", adjustCanvas);
+
+      // Initialize Unity
       createUnityInstance(document.querySelector("#unity-canvas"), {
         dataUrl: "Build/Build.data.unityweb",
         frameworkUrl: "Build/Build.framework.js.unityweb",
@@ -32,8 +71,8 @@
         companyName: "DefaultCompany",
         productName: "JamesURPOS",
         productVersion: "0.1.0",
-        // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
-        // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
+      }).then((unityInstance) => {
+        adjustCanvas(); // Ensure canvas fits after Unity initializes
       });
     </script>
   </body>
