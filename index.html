@@ -2,8 +2,7 @@
 <html lang="en-us">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Unity WebGL Player | Landscape Fullscreen</title>
+    <title>Unity WebGL Player | Fullscreen Disabled</title>
     <style>
       body {
         margin: 0;
@@ -15,32 +14,14 @@
         height: 100vh;
         background: black;
       }
-
       #unity-container {
         position: relative;
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        width: 100%;
+        height: 100%;
+        max-width: 100vw;
+        max-height: 100vh;
+        aspect-ratio: 16 / 9;
       }
-
-      #rotate-message {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: black;
-        color: white;
-        font-size: 2em;
-        text-align: center;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-
       canvas {
         display: block;
         width: 100%;
@@ -53,26 +34,26 @@
     <div id="unity-container">
       <canvas id="unity-canvas" tabindex="-1"></canvas>
     </div>
-    <div id="rotate-message">Please rotate your device to landscape mode.</div>
-
     <script src="Build/Build.loader.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         const canvas = document.querySelector("#unity-canvas");
-        const rotateMessage = document.querySelector("#rotate-message");
 
-        // Detect orientation
-        function checkOrientation() {
-          if (window.innerWidth < window.innerHeight) {
-            rotateMessage.style.display = "flex"; // Show the message in portrait
-          } else {
-            rotateMessage.style.display = "none"; // Hide the message in landscape
-          }
-        }
+        // Prevent fullscreen on click
+        canvas.addEventListener("click", (event) => {
+          event.stopPropagation(); // Prevent fullscreen trigger
+        });
 
-        // Listen for orientation changes
-        window.addEventListener("resize", checkOrientation);
-        checkOrientation(); // Initial check
+        // Override fullscreen requests
+        document.exitFullscreen = () => {
+          console.log("Fullscreen disabled.");
+        };
+
+        // Block Unity's internal fullscreen logic
+        const originalRequestFullscreen = canvas.requestFullscreen;
+        canvas.requestFullscreen = () => {
+          console.log("Fullscreen request blocked.");
+        };
 
         // Initialize Unity
         createUnityInstance(canvas, {
@@ -81,18 +62,9 @@
           codeUrl: "Build/Build.wasm.unityweb",
           streamingAssetsUrl: "StreamingAssets",
           companyName: "DefaultCompany",
-          productName: "LandscapeOnlyExample",
+          productName: "FullscreenDisabledExample",
           productVersion: "0.1.0",
         });
-
-        // Lock fullscreen in landscape only
-        canvas.requestFullscreen = () => {
-          if (window.innerWidth > window.innerHeight) {
-            document.body.requestFullscreen();
-          } else {
-            console.log("Fullscreen request blocked: Landscape only.");
-          }
-        };
       });
     </script>
   </body>
